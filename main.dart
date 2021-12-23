@@ -1,4 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+const images = [
+  'https://images.unsplash.com/photo-1593642634367-d91a135587b5?ixlib=rb-1.2.1&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2069&q=80',
+  'https://images.unsplash.com/photo-1593642532871-8b12e02d091c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1112&q=80',
+  'https://images.unsplash.com/photo-1640215775144-cafac1067fe6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
+  'https://images.unsplash.com/photo-1593642533144-3d62aa4783ec?ixlib=rb-1.2.1&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1169&q=80'
+];
+
+var my_photo = 'https://i.ibb.co/JzVnyqF/IMG-20211223-230343.jpg';
+
+const Map<int, Color> color = {
+  50: Color.fromRGBO(190, 190, 190, 1),
+  100: Color.fromRGBO(158, 158, 158, 1),
+  200: Color.fromRGBO(139, 139, 139, 1),
+  300: Color.fromRGBO(121, 121, 121, 1),
+  400: Color.fromRGBO(103, 103, 103, 1),
+  500: Color.fromRGBO(85, 85, 85, 1),
+  600: Color.fromRGBO(68, 68, 68, 1),
+  700: Color.fromRGBO(52, 52, 52, 1),
+  800: Color.fromRGBO(37, 37, 37, 1),
+  900: Color.fromRGBO(20, 20, 20, 1),
+};
+
+MaterialColor colorCustom = MaterialColor(color[900]!.value, color);
+
+var return_tag;
 
 void main() {
   runApp(const MyApp());
@@ -11,20 +38,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Instagram',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: colorCustom,
       ),
-      home: const MyHomePage(title: 'Гнатюк Євгеній'),
+      home: const MyHomePage(title: 'Instagram'),
     );
   }
 }
@@ -32,84 +50,205 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
+  void _dismissDialog() {
+    Navigator.pop(context);
+  }
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+  void _buttonAction() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Dialog'),
+            content: const Text('Message.'),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () {
+                    _dismissDialog();
+                  },
+                  child: const Text('Close')),
+              TextButton(
+                onPressed: () {
+                  _dismissDialog();
+                },
+                child: const Text('And... close'),
+              ),
+            ],
+          );
+        });
+  }
+
+  int _currIndex = 0;
+
+  var tabs;
+
+  var controller;
+  bool isFabVisible = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    var posts = <Widget>[];
+    for (var i = 0; i < 4; i++) {
+      posts.add(Container(
+        padding: const EdgeInsets.only(top: 20),
+        color: const Color.fromRGBO(234, 230, 230, 1),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Icon(Icons.person_pin),
+                  Expanded(
+                    child: Text('User ' + (i + 1).toString(),
+                        textAlign: TextAlign.start,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18)),
+                  )
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                return_tag = i;
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => OpenedImage()));
+              },
+              child: Hero(
+                tag: (i + 1).toString(),
+                child: Container(
+                  decoration: const BoxDecoration(boxShadow: [
+                    BoxShadow(
+                      color: Colors.black,
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                      offset: Offset(0, 3),
+                    ),
+                  ]),
+                  child: Image.network(images[i]),
+                ),
+              ),
+            ),
+            Container(
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Icon(Icons.comment),
+                  Icon(Icons.send),
+                ],
+              ),
+            )
+          ],
+        ),
+      ));
+    }
+
+    tabs = [
+      ListView(
+        children: [
+          Column(
+            children: posts,
+          ),
+        ],
+      ),
+      ListView(
+        children: [
+          Column(
+            children: List.from(posts.reversed),
+          ),
+        ],
+      ),
+    ];
+    controller = TabController(length: tabs.length, vsync: this);
+    controller.addListener(() {
+      setState(() {
+        _currIndex = controller.index;
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'Гнатюк Євгеній',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: (notification) {
+          if (notification.direction == ScrollDirection.forward) {
+            if (!isFabVisible) setState(() => isFabVisible = true);
+          } else if (notification.direction == ScrollDirection.reverse) {
+            if (isFabVisible) setState(() => isFabVisible = false);
+          }
+          return false;
+        },
+        child: TabBarView(
+          children: tabs,
+          controller: controller,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      drawer: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('Yevhenii Hnatiuk TI-82',
+              style: TextStyle(color: Colors.white, fontSize: 36)),
+          Image.network(my_photo),
+        ],
+      ),
+      floatingActionButton: Visibility(
+          visible: isFabVisible,
+          child: FloatingActionButton(
+            onPressed: _buttonAction,
+            tooltip: 'Dialog',
+            child: const Icon(Icons.add),
+          )),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currIndex,
+        selectedItemColor: color[900],
+        onTap: (index) {
+          setState(() {
+            _currIndex = index;
+            controller.animateTo(index);
+          });
+        },
+        items: [
+          BottomNavigationBarItem(
+            label: 'Home',
+            icon: const Icon(Icons.home_filled),
+          ),
+          BottomNavigationBarItem(
+            label: 'Profile',
+            icon: const Icon(Icons.person_pin_circle),
+          ),
+        ],
+      ),
     );
+  }
+}
+
+class OpenedImage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Image'),
+        ),
+        body: Hero(
+          tag: (return_tag + 1).toString(),
+          child: Image.network(images[return_tag]),
+        ));
   }
 }
